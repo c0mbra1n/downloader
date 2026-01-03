@@ -60,7 +60,7 @@
                                         </div>
                                     </td>
                                     <td style="white-space: nowrap;">{{ $item->formatted_size }}</td>
-                                    <td style="white-space: nowrap;">{{ $item->trashed_at->format('M d, H:i') }}</td>
+                                    <td style="white-space: nowrap;">{{ $item->trashed_at?->format('M d, H:i') ?? '-' }}</td>
                                     <td>
                                         <span class="badge {{ $item->days_until_deletion <= 7 ? 'badge-red' : 'badge-gray' }}">
                                             {{ $item->days_until_deletion }} days
