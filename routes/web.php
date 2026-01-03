@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\Auth\LoginController;
@@ -26,7 +27,6 @@ Route::middleware('auth')->group(function () {
 
     // Auth
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('password/change', [LoginController::class, 'showChangePasswordForm'])->name('password.change');
     Route::post('password/change', [LoginController::class, 'changePassword'])->name('password.update');
 
     // Downloads
@@ -47,6 +47,10 @@ Route::middleware('auth')->group(function () {
     Route::post('trash/{download}/restore', [TrashController::class, 'restore'])->name('trash.restore');
     Route::delete('trash/{download}', [TrashController::class, 'destroy'])->name('trash.destroy');
     Route::delete('trash', [TrashController::class, 'emptyTrash'])->name('trash.empty');
+
+    // Settings
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('settings/cookies', [SettingsController::class, 'saveCookies'])->name('settings.cookies');
 
     // Media Streaming
     Route::get('stream/{download}', [StreamController::class, 'stream'])->name('stream');

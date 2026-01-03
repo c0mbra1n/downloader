@@ -1058,8 +1058,8 @@
                     </svg>
                     Trash
                 </a>
-                <a href="{{ route('password.change') }}"
-                    class="nav-item {{ request()->routeIs('password.*') ? 'active' : '' }}"
+                <a href="{{ route('settings.index') }}"
+                    class="nav-item {{ request()->routeIs('settings.*') || request()->routeIs('password.*') ? 'active' : '' }}"
                     @click="sidebarOpen = false">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1075,7 +1075,7 @@
                 @php
                     use App\Models\Download;
                     use App\Enums\DownloadStatus;
-                    
+
                     // Count only completed downloads from database (not trashed)
                     $completedDownloads = Download::where('status', DownloadStatus::COMPLETED)
                         ->whereNull('trashed_at')
