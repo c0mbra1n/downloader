@@ -231,6 +231,17 @@
 
                 init() {
                     this.$watch('viewMode', (value) => localStorage.setItem('filesViewMode', value));
+                    
+                    // Safeguard: warn before leaving page while uploading
+                    this.$watch('uploading', (value) => {
+                        if (value) {
+                            window.onbeforeunload = function() {
+                                return "Upload sedang berjalan. Jika Anda keluar, upload akan terhenti. Yakin ingin keluar?";
+                            };
+                        } else {
+                            window.onbeforeunload = null;
+                        }
+                    });
                 },
 
                 handleFileUpload(event) {
