@@ -98,11 +98,12 @@
                                     </button>
                                 @endif
                                 <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇</a>
-                                <form action="{{ route('files.destroy', $file) }}" method="POST" style="display: inline;"
-                                    onsubmit="return confirm('Hapus file ini secara permanen?')">
+                                <form id="delete-form-grid-{{ $file->id }}" action="{{ route('files.destroy', $file) }}"
+                                    method="POST" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                        onclick="confirmTrash({{ $file->id }}, 'grid')">✕</button>
                                 </form>
                             </div>
                         </div>
@@ -137,7 +138,8 @@
                         <div class="file-list-item-content">
                             <div class="file-list-item-name" title="{{ $file->filename }}">{{ $file->filename }}</div>
                             <div class="file-list-item-meta">{{ $file->formatted_size }} •
-                                {{ $file->completed_at?->format('M d, Y') }}</div>
+                                {{ $file->completed_at?->format('M d, Y') }}
+                            </div>
                         </div>
                         <div class="file-list-item-actions">
                             @if($file->isPlayable())
@@ -147,11 +149,12 @@
                                 </button>
                             @endif
                             <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇ Download</a>
-                            <form action="{{ route('files.destroy', $file) }}" method="POST" style="display: inline;"
-                                onsubmit="return confirm('Hapus file ini secara permanen?')">
+                            <form id="delete-form-list-{{ $file->id }}" action="{{ route('files.destroy', $file) }}" method="POST"
+                                style="display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    onclick="confirmTrash({{ $file->id }}, 'list')">✕</button>
                             </form>
                         </div>
                     </div>
@@ -211,6 +214,23 @@
                     this.playerId = null;
                 }
             };
+        }
+
+        function confirmTrash(id, viewType) {
+            Swal.fire({
+                title: 'Pindah ke Trash?',
+                text: 'File akan dipindah ke Recycle Bin dan dihapus otomatis setelah 30 hari.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Pindahkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + viewType + '-' + id).submit();
+                }
+            });
         }
     </script>
 @endsection
