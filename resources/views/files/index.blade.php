@@ -121,12 +121,20 @@
                                     <span class="badge badge-purple" style="width: 100%; text-align: center;">Optimizing...</span>
                                 @else
                                     @if($file->isPlayable())
-                                        <button type="button" class="btn btn-primary btn-sm"
-                                            @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
-                                            ▶ Play
-                                        </button>
+                                        <div style="display: flex; gap: 4px;">
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
+                                                ▶ Play
+                                            </button>
+                                            @if($file->isVideo())
+                                                <form action="{{ route('files.optimize', $file) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-secondary btn-sm" title="Optimize for Web">✨</button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @endif
-                                    <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇</a>
+                                    <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm" title="Download">⬇</a>
                                 @endif
                                 <form id="delete-form-grid-{{ $file->id }}" action="{{ route('files.destroy', $file) }}"
                                     method="POST" style="display: inline;">
@@ -180,6 +188,12 @@
                                         @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
                                         ▶ Play
                                     </button>
+                                    @if($file->isVideo())
+                                        <form action="{{ route('files.optimize', $file) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-secondary btn-sm" title="Optimize for Web">✨ Optimize</button>
+                                        </form>
+                                    @endif
                                 @endif
                                 <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇ Download</a>
                             @endif

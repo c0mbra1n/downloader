@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('files', [FileManagerController::class, 'index'])->name('files.index');
     Route::get('files/{download}/download', [FileManagerController::class, 'download'])->name('files.download');
     Route::post('files/upload', [FileManagerController::class, 'upload'])->name('files.upload');
+    Route::post('files/{download}/optimize', [FileManagerController::class, 'optimize'])->name('files.optimize');
     Route::delete('files/{download}', [FileManagerController::class, 'destroy'])->name('files.destroy');
 
     // Trash

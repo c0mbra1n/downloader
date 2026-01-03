@@ -123,6 +123,26 @@ class FileManagerController extends Controller
     }
 
     /**
+     * Start manual optimization for a video
+     */
+    public function optimize(Download $download): RedirectResponse
+    {
+        if (!$download->isVideo()) {
+            return back()->with('error', 'Only videos can be optimized.');
+        }
+
+        $download->update([
+            'status' => DownloadStatus::PROCESSING,
+            'progress' => 0,
+            'error_message' => null
+        ]);
+
+        OptimizeVideoJob::dispatch($download);
+
+        return back()->with('success', 'Optimization started in the background.');
+    }
+
+    /**
      * Move file to trash (soft delete)
      */
     public function destroy(Download $download): RedirectResponse
