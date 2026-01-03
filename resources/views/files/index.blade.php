@@ -118,7 +118,14 @@
                             </div>
                             <div class="file-card-actions">
                                 @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
-                                    <span class="badge badge-purple" style="width: 100%; text-align: center;">Optimizing...</span>
+                                    <div style="width: 100%;">
+                                        <div class="progress-bar" style="height: 6px; margin-bottom: 4px; background: var(--divider); border-radius: 3px; overflow: hidden;">
+                                            <div class="progress-bar-fill" style="height: 100%; background: #7E22CE; transition: width 0.3s;" :style="'width: {{ $file->progress }}%'"></div>
+                                        </div>
+                                        <div style="font-size: 11px; text-align: center; color: var(--text-medium); font-weight: 500;">
+                                            Optimizing: {{ $file->progress }}%
+                                        </div>
+                                    </div>
                                 @else
                                     @if($file->isPlayable())
                                         <div style="display: flex; gap: 4px;">
@@ -181,7 +188,14 @@
                         </div>
                         <div class="file-list-item-actions">
                             @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
-                                <span class="badge badge-purple">Optimizing...</span>
+                                <div style="width: 120px; margin-right: 12px;">
+                                    <div class="progress-bar" style="height: 6px; margin-bottom: 2px; background: var(--divider); border-radius: 3px; overflow: hidden;">
+                                        <div class="progress-bar-fill" style="height: 100%; background: #7E22CE; transition: width 0.3s;" :style="'width: {{ $file->progress }}%'"></div>
+                                    </div>
+                                    <div style="font-size: 10px; text-align: center; color: var(--text-medium);">
+                                        Optimizing: {{ $file->progress }}%
+                                    </div>
+                                </div>
                             @else
                                 @if($file->isPlayable())
                                     <button type="button" class="btn btn-primary btn-sm"
@@ -264,6 +278,15 @@
                             window.onbeforeunload = null;
                         }
                     });
+
+                    // Auto-refresh if there are items being processed
+                    @if($files->contains('status', \App\Enums\DownloadStatus::PROCESSING))
+                        setTimeout(() => {
+                            if (!this.uploading && !this.playerOpen) {
+                                window.location.reload();
+                            }
+                        }, 5000); // refresh every 5s
+                    @endif
                 },
 
                 handleFileUpload(event) {

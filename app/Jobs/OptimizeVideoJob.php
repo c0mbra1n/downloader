@@ -47,17 +47,31 @@ class OptimizeVideoJob implements ShouldQueue
             return;
         }
 
+        // Get video duration for progress calculation
+        $duration = 0;
+        try {
+            $durationResult = Process::run([
+                'ffprobe',
+                '-v',
+                'error',
+                '-show_entries',
+                'format=duration',
+                '-of',
+                'default=noprint_wrappers=1:nokey=1',
+                $inputPath
+            ]);
+            if ($durationResult->successful()) {
+                $duration = (float) trim($durationResult->output());
+                Log::debug("OptimizeVideoJob: Video duration detected: {$duration}s");
+            }
+        } catch (\Exception $e) {
+            Log::warning("OptimizeVideoJob: Could not detect duration: " . $e->getMessage());
+        }
+
         $outputPath = $inputPath . '.optimized.mp4';
 
         Log::info("OptimizeVideoJob: Starting optimization for {$this->download->filename} (ID: {$this->download->id})");
 
-        // Command details:
-        // -y: overwrite
-        // -c:v libx264: ensure H.264
-        // -preset fast: good balance for speed/quality
-        // -crf 23: standard quality
-        // -c:a aac: ensure AAC audio
-        // -movflags +faststart: move moov atom to start for web playback
         $command = [
             'ffmpeg',
             '-y',
@@ -80,7 +94,27 @@ class OptimizeVideoJob implements ShouldQueue
 
         try {
             Log::debug("OptimizeVideoJob running: " . implode(' ', $command));
-            $result = Process::timeout($this->timeout)->run($command);
+
+            $process = Process::timeout($this->timeout)->start($command, function (string $type, string $buffer) use ($duration) {
+                if ($type === 'err' && $duration > 0) {
+                    // ffmpeg outputs progress to stderr
+                    if (preg_match('/time=(\d+):(\d+):(\d+\.\d+)/', $buffer, $matches)) {
+                        $hours = (int) $matches[1];
+                        $mins = (int) $matches[2];
+                        $secs = (float) $matches[3];
+                        $currentTime = ($hours * 3600) + ($mins * 60) + $secs;
+
+                        $progress = min(99, round(($currentTime / $duration) * 100));
+
+                        // Update progress if it increased significantly (avoiding too many writes)
+                        if ($progress > ($this->download->progress + 2)) {
+                            $this->download->update(['progress' => $progress]);
+                        }
+                    }
+                }
+            });
+
+            $result = $process->wait();
 
             if ($result->successful()) {
                 // Replace original file with optimized one
@@ -91,10 +125,11 @@ class OptimizeVideoJob implements ShouldQueue
                 $newSize = filesize($inputPath);
                 $this->download->update([
                     'status' => DownloadStatus::COMPLETED,
+                    'progress' => 100,
                     'file_size' => $newSize,
                     'downloaded_bytes' => $newSize,
                     'total_bytes' => $newSize,
-                    'completed_at' => now(), // refresh completed_at to now
+                    'completed_at' => now(),
                 ]);
 
                 Log::info("OptimizeVideoJob: Optimization successful for {$this->download->filename}");
@@ -102,14 +137,13 @@ class OptimizeVideoJob implements ShouldQueue
                 Log::error("OptimizeVideoJob: Optimization failed for {$this->download->filename}");
                 Log::error($result->errorOutput());
 
-                // Cleanup temp file if it exists
                 if (file_exists($outputPath)) {
                     @unlink($outputPath);
                 }
 
-                // Fallback: mark as completed but log failure so it's not stuck
                 $this->download->update([
                     'status' => DownloadStatus::COMPLETED,
+                    'progress' => 100,
                     'error_message' => 'Optimization failed, kept original: ' . trim($result->errorOutput()),
                 ]);
             }
@@ -122,6 +156,7 @@ class OptimizeVideoJob implements ShouldQueue
 
             $this->download->update([
                 'status' => DownloadStatus::COMPLETED,
+                'progress' => 100,
                 'error_message' => 'Optimization exception, kept original: ' . $e->getMessage(),
             ]);
         }

@@ -29,7 +29,9 @@ class FileManagerController extends Controller
             'others' => 'Others',
         ];
 
-        $query = Download::completed()->orderBy('completed_at', 'desc');
+        $query = Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])
+            ->whereNull('trashed_at')
+            ->orderBy('completed_at', 'desc');
 
         if ($category !== 'all') {
             $query->where('file_path', 'like', "downloads/{$category}/%");
@@ -39,12 +41,12 @@ class FileManagerController extends Controller
 
         // Get category counts
         $counts = [
-            'all' => Download::completed()->count(),
-            'videos' => Download::completed()->where('file_path', 'like', 'downloads/videos/%')->count(),
-            'audios' => Download::completed()->where('file_path', 'like', 'downloads/audios/%')->count(),
-            'documents' => Download::completed()->where('file_path', 'like', 'downloads/documents/%')->count(),
-            'archives' => Download::completed()->where('file_path', 'like', 'downloads/archives/%')->count(),
-            'others' => Download::completed()->where('file_path', 'like', 'downloads/others/%')->count(),
+            'all' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->count(),
+            'videos' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->where('file_path', 'like', 'downloads/videos/%')->count(),
+            'audios' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->where('file_path', 'like', 'downloads/audios/%')->count(),
+            'documents' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->where('file_path', 'like', 'downloads/documents/%')->count(),
+            'archives' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->where('file_path', 'like', 'downloads/archives/%')->count(),
+            'others' => Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])->whereNull('trashed_at')->where('file_path', 'like', 'downloads/others/%')->count(),
         ];
 
         return view('files.index', compact('files', 'categories', 'category', 'counts'));
