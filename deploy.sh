@@ -61,28 +61,32 @@ while true; do
             echo ""
             
             # Step 1: Git Pull
-            echo -e "${BLUE}[1/3] Updating Code...${NC}"
+            echo -e "${BLUE}[1/5] Updating Code...${NC}"
             git pull origin main
             if [ $? -ne 0 ]; then
                 echo -e "${RED}❌ Git Pull Failed! Aborting.${NC}"
                 # Don't exit script, just break to menu
             else
                 # Step 2: Migrate
-                echo -e "${BLUE}[2/3] Updating Database...${NC}"
+                echo -e "${BLUE}[2/5] Updating Database...${NC}"
                 php artisan migrate --force
                 
                 # Step 3: Cache
-                echo -e "${BLUE}[3/3] Optimizing System...${NC}"
+                echo -e "${BLUE}[3/5] Optimizing System...${NC}"
                 php artisan optimize:clear
                 php artisan config:cache
                 php artisan view:cache
                 php artisan route:cache
                 
                 # Step 4: Permissions
-                echo -e "${BLUE}[4/4] Fixing Permissions...${NC}"
+                echo -e "${BLUE}[4/5] Fixing Permissions...${NC}"
                 chmod -R 777 storage bootstrap/cache
                 echo -e "${GREEN}✅ Permissions Fixed!${NC}"
 
+                # Step 5: Restart Worker
+                echo -e "${BLUE}[5/5] Restarting Queue Worker...${NC}"
+                supervisorctl restart dl-ragos-worker:*
+                echo -e "${GREEN}✅ Worker Restarted!${NC}"
                 
                 echo ""
                 echo -e "${GREEN}✨ FULL DEPLOYMENT COMPLETED SUCCESSFULLY! ✨${NC}"
