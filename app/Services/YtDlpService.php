@@ -139,9 +139,16 @@ class YtDlpService
         $escapedDir = escapeshellarg($dir);
         $outputTemplate = escapeshellarg("%(title).100s__{$downloadId}.%(ext)s");
 
-        // Check if cookies file exists
+        // Universal cookies file - supports all platforms (YouTube, PornHub, etc.)
+        // Export cookies from browser using extension like "Get cookies.txt LOCALLY"
+        // Combine all cookies from different sites into this single file
         $cookiesPath = storage_path('app/cookies.txt');
-        $cookiesFlag = file_exists($cookiesPath) ? '--cookies ' . escapeshellarg($cookiesPath) . ' ' : '';
+        $cookiesFlag = '';
+
+        if (file_exists($cookiesPath) && filesize($cookiesPath) > 0) {
+            $cookiesFlag = '--cookies ' . escapeshellarg($cookiesPath) . ' ';
+            Log::info("yt-dlp: Using cookies from {$cookiesPath}");
+        }
 
         return sprintf(
             'yt-dlp %s ' .
