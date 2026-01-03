@@ -18,16 +18,19 @@ class YtDlpService
     }
 
     /**
-     * Check if URL is a video platform URL
+     * Check if URL should be handled by yt-dlp (video platform or non-direct-file URL)
+     * If URL doesn't look like a direct file download, assume it's a video platform
      */
     public static function isVideoUrl(string $url): bool
     {
-        $videoPatterns = [
+        // Known video platform domains - always use yt-dlp
+        $videoPlatforms = [
             'youtube.com',
             'youtu.be',
             'vimeo.com',
             'dailymotion.com',
             'twitch.tv',
+            'clips.twitch.tv',
             'twitter.com',
             'x.com',
             'facebook.com',
@@ -38,16 +41,110 @@ class YtDlpService
             'reddit.com',
             'streamable.com',
             'v.redd.it',
-            'clips.twitch.tv',
         ];
 
-        foreach ($videoPatterns as $pattern) {
-            if (str_contains(strtolower($url), $pattern)) {
+        $lowercaseUrl = strtolower($url);
+
+        // Check if it's a known video platform
+        foreach ($videoPlatforms as $platform) {
+            if (str_contains($lowercaseUrl, $platform)) {
                 return true;
             }
         }
 
-        return false;
+        // Direct file extensions - use aria2c for these
+        $directFileExtensions = [
+            '.zip',
+            '.rar',
+            '.7z',
+            '.tar',
+            '.gz',
+            '.bz2',
+            '.xz',
+            '.iso',
+            '.dmg',
+            '.exe',
+            '.msi',
+            '.deb',
+            '.rpm',
+            '.apk',
+            '.pdf',
+            '.doc',
+            '.docx',
+            '.xls',
+            '.xlsx',
+            '.ppt',
+            '.pptx',
+            '.mp3',
+            '.wav',
+            '.flac',
+            '.aac',
+            '.ogg',
+            '.wma',
+            '.mp4',
+            '.mkv',
+            '.avi',
+            '.mov',
+            '.wmv',
+            '.flv',
+            '.webm',
+            '.m4v',
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.bmp',
+            '.svg',
+            '.webp',
+            '.txt',
+            '.csv',
+            '.json',
+            '.xml',
+        ];
+
+        // Parse URL to get the path
+        $parsedUrl = parse_url($url);
+        $path = $parsedUrl['path'] ?? '';
+
+        // Check if URL ends with a direct file extension
+        foreach ($directFileExtensions as $ext) {
+            if (str_ends_with(strtolower($path), $ext)) {
+                return false; // Use aria2c for direct files
+            }
+        }
+
+        // For URLs that:
+        // 1. Have query parameters (like ?viewkey=xxx, ?v=xxx)
+        // 2. End with paths like /watch, /video/, /view_video.php, etc.
+        // Use yt-dlp as these are likely video pages
+        if (!empty($parsedUrl['query'])) {
+            return true; // Has query params, likely a video page
+        }
+
+        // Check for common video page patterns in path
+        $videoPathPatterns = [
+            '/watch',
+            '/video',
+            '/embed',
+            '/player',
+            '/clip',
+            '/live',
+            '/reel',
+            '/shorts',
+            '/status',
+            '/post',
+            '.php'
+        ];
+
+        foreach ($videoPathPatterns as $pattern) {
+            if (str_contains($lowercaseUrl, $pattern)) {
+                return true;
+            }
+        }
+
+        // Default: if unsure and no file extension, try yt-dlp
+        // yt-dlp will fail gracefully if it can't handle the URL
+        return !str_contains($path, '.');
     }
 
     /**
