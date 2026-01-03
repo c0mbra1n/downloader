@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Download;
+use App\Enums\DownloadStatus;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -59,6 +61,52 @@ class FileManagerController extends Controller
         }
 
         return response()->download($path, $download->filename);
+    }
+
+    /**
+     * Upload a file
+     */
+    public function upload(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|max:512000', // max 512MB
+        ]);
+
+        if (!$request->hasFile('file')) {
+            return response()->json(['error' => 'No file uploaded'], 400);
+        }
+
+        $file = $request->file('file');
+        $filename = $file->getClientOriginalName();
+        $mimeType = $file->getMimeType();
+        $fileSize = $file->getSize();
+
+        // Use Download model to determine category
+        $tempDownload = new Download(['mime_type' => $mimeType]);
+        $category = $tempDownload->getStorageCategory();
+
+        $targetDir = "downloads/{$category}";
+        $path = $file->storeAs($targetDir, $filename, 'local');
+
+        // Create download record
+        $download = Download::create([
+            'url' => 'uploaded://' . $filename,
+            'filename' => $filename,
+            'file_path' => $path,
+            'file_size' => $fileSize,
+            'mime_type' => $mimeType,
+            'status' => DownloadStatus::COMPLETED,
+            'progress' => 100,
+            'downloaded_bytes' => $fileSize,
+            'total_bytes' => $fileSize,
+            'completed_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File uploaded successfully',
+            'download' => $download
+        ]);
     }
 
     /**

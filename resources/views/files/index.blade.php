@@ -10,21 +10,47 @@
                     <h1 class="page-title">File Manager</h1>
                     <p class="page-subtitle">Browse and manage your downloaded files</p>
                 </div>
-                <div class="view-toggle">
-                    <button class="view-toggle-btn" :class="{ 'active': viewMode === 'list' }" @click="viewMode = 'list'"
-                        title="List View">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="file" x-ref="fileInput" style="display: none;" @change="handleFileUpload($event)">
+                    <button class="btn btn-primary" @click="$refs.fileInput.click()" :disabled="uploading">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" style="margin-right: 4px;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
+                        <span x-text="uploading ? 'Uploading...' : 'Upload File'"></span>
                     </button>
-                    <button class="view-toggle-btn" :class="{ 'active': viewMode === 'grid' }" @click="viewMode = 'grid'"
-                        title="Grid View">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                    </button>
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn" :class="{ 'active': viewMode === 'list' }"
+                            @click="viewMode = 'list'" title="List View">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <button class="view-toggle-btn" :class="{ 'active': viewMode === 'grid' }"
+                            @click="viewMode = 'grid'" title="Grid View">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Progress Bar -->
+        <div x-show="uploading" x-transition class="card"
+            style="margin-bottom: 16px; border-left: 4px solid var(--primary);">
+            <div class="card-body" style="padding: 12px 16px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 14px; font-weight: 500;" x-text="'Uploading: ' + uploadFilename"></span>
+                    <span style="font-size: 14px; font-weight: 500;" x-text="uploadProgress + '%'"></span>
+                </div>
+                <div style="height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; background: var(--primary); transition: width 0.3s;"
+                        :style="'width: ' + uploadProgress + '%'"></div>
                 </div>
             </div>
         </div>
@@ -198,8 +224,77 @@
                 playerFilename: '',
                 playerIsVideo: true,
 
+                // Upload state
+                uploading: false,
+                uploadProgress: 0,
+                uploadFilename: '',
+
                 init() {
                     this.$watch('viewMode', (value) => localStorage.setItem('filesViewMode', value));
+                },
+
+                handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.uploading = true;
+                    this.uploadProgress = 0;
+                    this.uploadFilename = file.name;
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{{ route("files.upload") }}', true);
+                    xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
+
+                    // Progress events
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            this.uploadProgress = Math.round((e.loaded / e.total) * 100);
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'File ' + this.uploadFilename + ' berhasil diupload.',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            let errorMsg = 'Gagal mengupload file.';
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                errorMsg = response.error || response.message || errorMsg;
+                            } catch (e) { }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: errorMsg
+                            });
+                            this.uploading = false;
+                        }
+                    };
+
+                    xhr.onerror = () => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan jaringan.'
+                        });
+                        this.uploading = false;
+                    };
+
+                    xhr.send(formData);
+
+                    // Reset input so the same file can be uploaded again if needed
+                    event.target.value = '';
                 },
 
                 openPlayer(id, filename, isVideo) {

@@ -37,9 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::post('downloads/{download}/retry', [DownloadController::class, 'retry'])->name('downloads.retry');
     Route::delete('downloads/{download}', [DownloadController::class, 'destroy'])->name('downloads.destroy');
 
-    // File Manager
+    // File Manager routes
     Route::get('files', [FileManagerController::class, 'index'])->name('files.index');
     Route::get('files/{download}/download', [FileManagerController::class, 'download'])->name('files.download');
+    Route::post('files/upload', [FileManagerController::class, 'upload'])->name('files.upload');
     Route::delete('files/{download}', [FileManagerController::class, 'destroy'])->name('files.destroy');
 
     // Trash
