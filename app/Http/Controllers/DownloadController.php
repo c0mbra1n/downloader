@@ -132,18 +132,13 @@ class DownloadController extends Controller
     }
 
     /**
-     * Delete a download and its file
+     * Delete a download record (does NOT delete the file)
      */
     public function destroy(Download $download): RedirectResponse
     {
-        // Delete file if exists
-        if ($download->file_path && Storage::exists($download->file_path)) {
-            Storage::delete($download->file_path);
-        }
-
         $download->delete();
 
         return redirect()->route('downloads.index')
-            ->with('success', 'Download deleted successfully!');
+            ->with('success', 'Download record removed!');
     }
 }

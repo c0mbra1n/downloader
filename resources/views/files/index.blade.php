@@ -99,7 +99,7 @@
                                 @endif
                                 <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇</a>
                                 <form action="{{ route('files.destroy', $file) }}" method="POST" style="display: inline;"
-                                    onsubmit="return confirm('Delete?')">
+                                    onsubmit="return confirm('Hapus file ini secara permanen?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">✕</button>
@@ -148,7 +148,7 @@
                             @endif
                             <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇ Download</a>
                             <form action="{{ route('files.destroy', $file) }}" method="POST" style="display: inline;"
-                                onsubmit="return confirm('Delete?')">
+                                onsubmit="return confirm('Hapus file ini secara permanen?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">✕</button>
