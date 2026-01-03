@@ -18,7 +18,7 @@ class DownloadController extends Controller
      */
     public function index(): View
     {
-        $downloads = Download::orderBy('created_at', 'desc')->get();
+        $downloads = Download::orderBy('created_at', 'desc')->paginate(20);
 
         return view('downloads.index', compact('downloads'));
     }
@@ -89,23 +89,16 @@ class DownloadController extends Controller
     public function statusAll(): JsonResponse
     {
         // Optimization: Only poll active downloads + last 10 records
-        // This keeps the polling payload small and server load low
         $activeStatusIds = [
             DownloadStatus::QUEUED->value,
             DownloadStatus::DOWNLOADING->value
         ];
 
+        // Fetch IDs first to avoid MySQL subquery limit restrictions
+        $recentIds = Download::orderBy('created_at', 'desc')->limit(10)->pluck('id')->toArray();
+
         $downloads = Download::whereIn('status', $activeStatusIds)
-            ->orWhereIn('id', function ($query) {
-                // Wrap in another select to bypass MySQL limit restriction
-                $query->select('id')
-                    ->from(function ($q) {
-                    $q->select('id')
-                        ->from('downloads')
-                        ->orderBy('created_at', 'desc')
-                        ->limit(10);
-                }, 'recent_downloads');
-            })
+            ->orWhereIn('id', $recentIds)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($download) {
