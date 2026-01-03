@@ -582,6 +582,11 @@
             color: #D32F2F;
         }
 
+        .badge-purple {
+            background: #F3E8FF;
+            color: #7E22CE;
+        }
+
         /* Alerts */
         .alert {
             padding: 12px 16px;

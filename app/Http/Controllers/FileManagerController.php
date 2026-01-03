@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Download;
 use App\Enums\DownloadStatus;
+use App\Jobs\OptimizeVideoJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -88,6 +89,12 @@ class FileManagerController extends Controller
         $targetDir = "downloads/{$category}";
         $path = $file->storeAs($targetDir, $filename, 'local');
 
+        // Initial status - if it's a video, we want to optimize it for web
+        $status = DownloadStatus::COMPLETED;
+        if ($category === 'videos') {
+            $status = DownloadStatus::PROCESSING;
+        }
+
         // Create download record
         $download = Download::create([
             'url' => 'uploaded://' . $filename,
@@ -95,16 +102,22 @@ class FileManagerController extends Controller
             'file_path' => $path,
             'file_size' => $fileSize,
             'mime_type' => $mimeType,
-            'status' => DownloadStatus::COMPLETED,
-            'progress' => 100,
+            'status' => $status,
+            'progress' => ($status === DownloadStatus::COMPLETED) ? 100 : 0,
             'downloaded_bytes' => $fileSize,
             'total_bytes' => $fileSize,
-            'completed_at' => now(),
+            'completed_at' => ($status === DownloadStatus::COMPLETED) ? now() : null,
         ]);
+
+        if ($status === DownloadStatus::PROCESSING) {
+            OptimizeVideoJob::dispatch($download);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'File uploaded successfully',
+            'message' => ($status === DownloadStatus::PROCESSING)
+                ? 'File uploaded! Optimizing for web playback...'
+                : 'File uploaded successfully',
             'download' => $download
         ]);
     }

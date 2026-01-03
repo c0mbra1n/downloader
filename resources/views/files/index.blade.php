@@ -117,13 +117,17 @@
                                 {{ $file->formatted_size }} • {{ $file->completed_at?->format('M d') }}
                             </div>
                             <div class="file-card-actions">
-                                @if($file->isPlayable())
-                                    <button type="button" class="btn btn-primary btn-sm"
-                                        @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
-                                        ▶ Play
-                                    </button>
+                                @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
+                                    <span class="badge badge-purple" style="width: 100%; text-align: center;">Optimizing...</span>
+                                @else
+                                    @if($file->isPlayable())
+                                        <button type="button" class="btn btn-primary btn-sm"
+                                            @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
+                                            ▶ Play
+                                        </button>
+                                    @endif
+                                    <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇</a>
                                 @endif
-                                <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇</a>
                                 <form id="delete-form-grid-{{ $file->id }}" action="{{ route('files.destroy', $file) }}"
                                     method="POST" style="display: inline;">
                                     @csrf
@@ -168,13 +172,17 @@
                             </div>
                         </div>
                         <div class="file-list-item-actions">
-                            @if($file->isPlayable())
-                                <button type="button" class="btn btn-primary btn-sm"
-                                    @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
-                                    ▶ Play
-                                </button>
+                            @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
+                                <span class="badge badge-purple">Optimizing...</span>
+                            @else
+                                @if($file->isPlayable())
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        @click="openPlayer({{ $file->id }}, '{{ $file->filename }}', {{ $file->isVideo() ? 'true' : 'false' }})">
+                                        ▶ Play
+                                    </button>
+                                @endif
+                                <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇ Download</a>
                             @endif
-                            <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm">⬇ Download</a>
                             <form id="delete-form-list-{{ $file->id }}" action="{{ route('files.destroy', $file) }}" method="POST"
                                 style="display: inline;">
                                 @csrf
