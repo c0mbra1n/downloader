@@ -41,6 +41,7 @@ class YtDlpService
             'reddit.com',
             'streamable.com',
             'v.redd.it',
+            'drive.google.com',
         ];
 
         $lowercaseUrl = strtolower($url);
