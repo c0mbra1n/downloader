@@ -3,6 +3,7 @@
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\StreamController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 // Guest routes
 Route::middleware('guest')->group(function () {
-    Route::get('login', fn() => view('auth.login'))->name('login');
-    Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login.submit');
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [LoginController::class, 'login'])->name('login.submit');
 });
 
 // Authenticated routes
@@ -22,8 +23,10 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', fn() => redirect()->route('downloads.index'));
 
-    // Logout
-    Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+    // Auth
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('password/change', [LoginController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('password/change', [LoginController::class, 'changePassword'])->name('password.update');
 
     // Downloads
     Route::get('downloads', [DownloadController::class, 'index'])->name('downloads.index');
