@@ -146,6 +146,7 @@ class YtDlpService
             '--no-playlist ' .
             '--newline ' .
             '--progress ' .
+            '--remote-components ejs:github ' .
             '--output %s/%s ' .
             '--no-mtime ' .
             '--restrict-filenames ' .
