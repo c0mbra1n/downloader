@@ -9,11 +9,10 @@
             <p class="page-subtitle">Items will be permanently deleted after 30 days</p>
         </div>
         @if($trashedItems->count() > 0)
-            <form action="{{ route('trash.empty') }}" method="POST"
-                onsubmit="return confirm('Empty all trash? This cannot be undone!')">
+            <form id="empty-trash-form" action="{{ route('trash.empty') }}" method="POST">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-danger">
+                <button type="button" class="btn btn-danger" onclick="confirmEmptyTrash()">
                     🗑️ Empty Trash ({{ $formattedSize }})
                 </button>
             </form>
@@ -75,11 +74,12 @@
                                                     ↩️ Restore
                                                 </button>
                                             </form>
-                                            <form action="{{ route('trash.destroy', $item) }}" method="POST"
-                                                style="display: inline;" onsubmit="return confirm('Permanently delete this file?')">
+                                            <form id="delete-form-{{ $item->id }}" action="{{ route('trash.destroy', $item) }}"
+                                                method="POST" style="display: inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Delete Forever">
+                                                <button type="button" class="btn btn-danger btn-sm" title="Delete Forever"
+                                                    onclick="confirmPermanentDelete({{ $item->id }})">
                                                     ✕
                                                 </button>
                                             </form>
@@ -93,4 +93,40 @@
             </div>
         @endif
     </div>
+
+    <script>
+        function confirmEmptyTrash() {
+            Swal.fire({
+                title: 'Kosongkan Trash?',
+                text: 'Semua file akan dihapus permanen. Tindakan ini tidak bisa dibatalkan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Kosongkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('empty-trash-form').submit();
+                }
+            });
+        }
+
+        function confirmPermanentDelete(id) {
+            Swal.fire({
+                title: 'Hapus Permanen?',
+                text: 'File akan dihapus selamanya dan tidak bisa dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
 @endsection

@@ -70,7 +70,7 @@
             @endif
         </div>
         <div class="card-body">
-            <form action="{{ route('settings.cookies') }}" method="POST">
+            <form id="cookies-form" action="{{ route('settings.cookies') }}" method="POST">
                 @csrf
 
                 <div class="form-group">
@@ -91,8 +91,7 @@
                 <div style="display: flex; gap: 8px;">
                     <button type="submit" class="btn btn-primary">Simpan Cookies</button>
                     @if($cookiesExists)
-                        <button type="button" class="btn btn-danger"
-                            onclick="if(confirm('Hapus semua cookies?')) { document.getElementById('cookies').value = ''; this.form.submit(); }">
+                        <button type="button" class="btn btn-danger" onclick="confirmDeleteCookies()">
                             Hapus Cookies
                         </button>
                     @endif
@@ -100,4 +99,24 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function confirmDeleteCookies() {
+            Swal.fire({
+                title: 'Hapus Cookies?',
+                text: 'Semua cookies akan dihapus. Download dari situs yang butuh login mungkin tidak berfungsi.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('cookies').value = '';
+                    document.getElementById('cookies-form').submit();
+                }
+            });
+        }
+    </script>
 @endsection
