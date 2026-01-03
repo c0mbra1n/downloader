@@ -69,7 +69,7 @@ class FileManagerController extends Controller
     public function upload(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|max:512000', // max 512MB
+            'file' => 'required|file|max:5242880', // max 5GB
         ]);
 
         if (!$request->hasFile('file')) {
