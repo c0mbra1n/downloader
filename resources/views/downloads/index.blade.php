@@ -93,11 +93,11 @@
                                     </td>
                                     <td>
                                         <span class="badge" :class="{
-                                                                'badge-gray': download.status === 'queued',
-                                                                'badge-blue': download.status === 'downloading',
-                                                                'badge-green': download.status === 'completed',
-                                                                'badge-red': download.status === 'failed'
-                                                            }" x-text="download.status_label"></span>
+                                                                    'badge-gray': download.status === 'queued',
+                                                                    'badge-blue': download.status === 'downloading',
+                                                                    'badge-green': download.status === 'completed',
+                                                                    'badge-red': download.status === 'failed'
+                                                                }" x-text="download.status_label"></span>
                                     </td>
                                     <td>
                                         <template x-if="download.status === 'downloading' || download.status === 'queued'">
@@ -198,11 +198,11 @@
                                     </div>
                                     <div class="file-card-meta">
                                         <span class="badge" :class="{
-                                                                'badge-gray': download.status === 'queued',
-                                                                'badge-blue': download.status === 'downloading',
-                                                                'badge-green': download.status === 'completed',
-                                                                'badge-red': download.status === 'failed'
-                                                            }" x-text="download.status_label"></span>
+                                                                    'badge-gray': download.status === 'queued',
+                                                                    'badge-blue': download.status === 'downloading',
+                                                                    'badge-green': download.status === 'completed',
+                                                                    'badge-red': download.status === 'failed'
+                                                                }" x-text="download.status_label"></span>
                                         <span x-show="download.formatted_size"
                                             x-text="' • ' + download.formatted_size"></span>
                                     </div>
@@ -274,15 +274,26 @@
                 },
 
                 confirmDelete(formEl) {
-                    // Stop polling to prevent dialog dismissal
+                    // Stop polling to prevent any issues
                     this.stopPolling();
-                    
-                    if (confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) {
-                        formEl.submit();
-                    } else {
-                        // Resume polling if cancelled
-                        this.startPolling();
-                    }
+
+                    Swal.fire({
+                        title: 'Hapus Record?',
+                        text: 'File tidak akan dihapus, hanya record dari daftar.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formEl.submit();
+                        } else {
+                            // Resume polling if cancelled
+                            this.startPolling();
+                        }
+                    });
                 },
 
                 truncateUrl(url) {
