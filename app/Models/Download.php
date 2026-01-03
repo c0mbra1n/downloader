@@ -23,6 +23,7 @@ class Download extends Model
         'error_message',
         'started_at',
         'completed_at',
+        'trashed_at',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Download extends Model
         'total_bytes' => 'integer',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'trashed_at' => 'datetime',
     ];
 
     /**
@@ -108,11 +110,12 @@ class Download extends Model
     }
 
     /**
-     * Scope for completed downloads
+     * Scope for completed downloads (not trashed)
      */
     public function scopeCompleted($query)
     {
-        return $query->where('status', DownloadStatus::COMPLETED);
+        return $query->where('status', DownloadStatus::COMPLETED)
+            ->whereNull('trashed_at');
     }
 
     /**
@@ -121,6 +124,59 @@ class Download extends Model
     public function scopeFailed($query)
     {
         return $query->where('status', DownloadStatus::FAILED);
+    }
+
+    /**
+     * Scope for trashed items
+     */
+    public function scopeTrashed($query)
+    {
+        return $query->whereNotNull('trashed_at');
+    }
+
+    /**
+     * Scope for non-trashed items
+     */
+    public function scopeNotTrashed($query)
+    {
+        return $query->whereNull('trashed_at');
+    }
+
+    /**
+     * Check if item is in trash
+     */
+    public function isTrashed(): bool
+    {
+        return $this->trashed_at !== null;
+    }
+
+    /**
+     * Move to trash
+     */
+    public function moveToTrash(): void
+    {
+        $this->update(['trashed_at' => now()]);
+    }
+
+    /**
+     * Restore from trash
+     */
+    public function restoreFromTrash(): void
+    {
+        $this->update(['trashed_at' => null]);
+    }
+
+    /**
+     * Get days until permanent deletion
+     */
+    public function getDaysUntilDeletionAttribute(): ?int
+    {
+        if (!$this->trashed_at) {
+            return null;
+        }
+
+        $daysInTrash = $this->trashed_at->diffInDays(now());
+        return max(0, 30 - $daysInTrash);
     }
 
     /**

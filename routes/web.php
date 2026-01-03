@@ -3,6 +3,7 @@
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\StreamController;
+use App\Http\Controllers\TrashController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,12 @@ Route::middleware('auth')->group(function () {
     Route::get('files', [FileManagerController::class, 'index'])->name('files.index');
     Route::get('files/{download}/download', [FileManagerController::class, 'download'])->name('files.download');
     Route::delete('files/{download}', [FileManagerController::class, 'destroy'])->name('files.destroy');
+
+    // Trash
+    Route::get('trash', [TrashController::class, 'index'])->name('trash.index');
+    Route::post('trash/{download}/restore', [TrashController::class, 'restore'])->name('trash.restore');
+    Route::delete('trash/{download}', [TrashController::class, 'destroy'])->name('trash.destroy');
+    Route::delete('trash', [TrashController::class, 'emptyTrash'])->name('trash.empty');
 
     // Media Streaming
     Route::get('stream/{download}', [StreamController::class, 'stream'])->name('stream');

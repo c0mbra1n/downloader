@@ -1050,6 +1050,14 @@
                     </svg>
                     File Manager
                 </a>
+                <a href="{{ route('trash.index') }}"
+                    class="nav-item {{ request()->routeIs('trash.*') ? 'active' : '' }}" @click="sidebarOpen = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Trash
+                </a>
                 <a href="{{ route('password.change') }}"
                     class="nav-item {{ request()->routeIs('password.*') ? 'active' : '' }}"
                     @click="sidebarOpen = false">
@@ -1068,10 +1076,17 @@
                     use App\Models\Download;
                     use App\Enums\DownloadStatus;
                     
-                    // Count only completed downloads from database
-                    $completedDownloads = Download::where('status', DownloadStatus::COMPLETED)->get();
+                    // Count only completed downloads from database (not trashed)
+                    $completedDownloads = Download::where('status', DownloadStatus::COMPLETED)
+                        ->whereNull('trashed_at')
+                        ->get();
                     $fileCount = $completedDownloads->count();
                     $totalSize = $completedDownloads->sum('file_size');
+
+                    // Count trashed items
+                    $trashedItems = Download::whereNotNull('trashed_at')->get();
+                    $trashCount = $trashedItems->count();
+                    $trashSize = $trashedItems->sum('file_size');
 
                     if ($totalSize >= 1073741824) {
                         $formattedSize = number_format($totalSize / 1073741824, 2) . ' GB';
@@ -1081,6 +1096,16 @@
                         $formattedSize = number_format($totalSize / 1024, 2) . ' KB';
                     } else {
                         $formattedSize = $totalSize . ' B';
+                    }
+
+                    if ($trashSize >= 1073741824) {
+                        $formattedTrashSize = number_format($trashSize / 1073741824, 2) . ' GB';
+                    } elseif ($trashSize >= 1048576) {
+                        $formattedTrashSize = number_format($trashSize / 1048576, 2) . ' MB';
+                    } elseif ($trashSize >= 1024) {
+                        $formattedTrashSize = number_format($trashSize / 1024, 2) . ' KB';
+                    } else {
+                        $formattedTrashSize = $trashSize . ' B';
                     }
 
                     $downloadPath = storage_path('app/downloads');
@@ -1105,6 +1130,11 @@
                     <div class="storage-label">Storage</div>
                     <div class="storage-size">{{ $formattedSize }}</div>
                     <div class="storage-count">{{ $fileCount }} {{ $fileCount == 1 ? 'file' : 'files' }}</div>
+                    @if($trashCount > 0)
+                        <div class="storage-count" style="color: var(--text-light); font-size: 11px;">
+                            🗑️ {{ $trashCount }} in trash ({{ $formattedTrashSize }})
+                        </div>
+                    @endif
                     <div class="storage-bar">
                         <div class="storage-bar-fill" style="width: {{ $diskUsedPercent }}%;"></div>
                     </div>

@@ -62,19 +62,13 @@ class FileManagerController extends Controller
     }
 
     /**
-     * Delete a file
+     * Move file to trash (soft delete)
      */
     public function destroy(Download $download): RedirectResponse
     {
-        $path = $download->absolute_path;
-
-        if ($path && file_exists($path)) {
-            unlink($path);
-        }
-
-        $download->delete();
+        $download->moveToTrash();
 
         return redirect()->route('files.index')
-            ->with('success', 'File deleted successfully!');
+            ->with('success', 'File moved to trash! Will be deleted in 30 days.');
     }
 }
