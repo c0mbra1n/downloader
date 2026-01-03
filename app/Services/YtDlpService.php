@@ -35,16 +35,6 @@ class YtDlpService
             'tiktok.com',
             'bilibili.com',
             'nicovideo.jp',
-            'pornhub.com',
-            'xvideos.com',
-            'xnxx.com',
-            'redtube.com',
-            'youporn.com',
-            'spankbang.com',
-            'xhamster.com',
-            'eporner.com',
-            'tube8.com',
-            'youjizz.com',
             'reddit.com',
             'streamable.com',
             'v.redd.it',
@@ -139,7 +129,7 @@ class YtDlpService
         $escapedDir = escapeshellarg($dir);
         $outputTemplate = escapeshellarg("%(title).100s__{$downloadId}.%(ext)s");
 
-        // Universal cookies file - supports all platforms (YouTube, PornHub, etc.)
+        // Universal cookies file - supports all platforms
         // Export cookies from browser using extension like "Get cookies.txt LOCALLY"
         // Combine all cookies from different sites into this single file
         $cookiesPath = storage_path('app/cookies.txt');
