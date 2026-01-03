@@ -84,27 +84,43 @@ class DownloadController extends Controller
     }
 
     /**
-     * Get all downloads status (for batch polling)
+     * Get active downloads status (for smart batch polling)
      */
     public function statusAll(): JsonResponse
     {
-        $downloads = Download::orderBy('created_at', 'desc')->get()->map(function ($download) {
-            return [
-                'id' => $download->id,
-                'url' => $download->url,
-                'status' => $download->status->value,
-                'status_label' => $download->status->label(),
-                'status_color' => $download->status->color(),
-                'progress' => $download->progress,
-                'downloaded_bytes' => $download->downloaded_bytes,
-                'total_bytes' => $download->total_bytes,
-                'filename' => $download->filename,
-                'file_size' => $download->file_size,
-                'formatted_size' => $download->formatted_size,
-                'error_message' => $download->error_message,
-                'created_at' => $download->created_at->format('Y-m-d H:i:s'),
-            ];
-        });
+        // Optimization: Only poll active downloads + last 10 records
+        // This keeps the polling payload small and server load low
+        $activeStatusIds = [
+            DownloadStatus::QUEUED->value,
+            DownloadStatus::DOWNLOADING->value
+        ];
+
+        $downloads = Download::whereIn('status', $activeStatusIds)
+            ->orWhereIn('id', function ($query) {
+                $query->select('id')
+                    ->from('downloads')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($download) {
+                return [
+                    'id' => $download->id,
+                    'url' => $download->url,
+                    'status' => $download->status->value,
+                    'status_label' => $download->status->label(),
+                    'status_color' => $download->status->color(),
+                    'progress' => $download->progress,
+                    'downloaded_bytes' => $download->downloaded_bytes,
+                    'total_bytes' => $download->total_bytes,
+                    'filename' => $download->filename,
+                    'file_size' => $download->file_size,
+                    'formatted_size' => $download->formatted_size,
+                    'error_message' => $download->error_message,
+                    'created_at' => $download->created_at->format('Y-m-d H:i:s'),
+                ];
+            });
 
         return response()->json(['downloads' => $downloads]);
     }

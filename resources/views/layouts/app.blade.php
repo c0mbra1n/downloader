@@ -869,6 +869,53 @@
         }
 
         /* Responsive */
+        /* Pagination */
+        .pagination-container nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-container .relative {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .pagination-container a,
+        .pagination-container span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 4px;
+            background: var(--bg-white);
+            color: var(--text-medium);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-1);
+            transition: all 0.2s;
+        }
+
+        .pagination-container a:hover {
+            background: var(--bg-grey);
+            color: var(--primary);
+        }
+
+        .pagination-container .active-btn {
+            background: var(--primary);
+            color: white;
+            cursor: default;
+        }
+
+        .pagination-container .disabled-btn {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
             .mobile-header {
                 display: flex;
@@ -1077,16 +1124,16 @@
                     use App\Enums\DownloadStatus;
 
                     // Count only completed downloads from database (not trashed)
-                    $completedDownloads = Download::where('status', DownloadStatus::COMPLETED)
+                    $fileCount = Download::where('status', DownloadStatus::COMPLETED)
                         ->whereNull('trashed_at')
-                        ->get();
-                    $fileCount = $completedDownloads->count();
-                    $totalSize = $completedDownloads->sum('file_size');
+                        ->count();
+                    $totalSize = Download::where('status', DownloadStatus::COMPLETED)
+                        ->whereNull('trashed_at')
+                        ->sum('file_size') ?: 0;
 
                     // Count trashed items
-                    $trashedItems = Download::whereNotNull('trashed_at')->get();
-                    $trashCount = $trashedItems->count();
-                    $trashSize = $trashedItems->sum('file_size');
+                    $trashCount = Download::whereNotNull('trashed_at')->count();
+                    $trashSize = Download::whereNotNull('trashed_at')->sum('file_size') ?: 0;
 
                     if ($totalSize >= 1073741824) {
                         $formattedSize = number_format($totalSize / 1073741824, 2) . ' GB';

@@ -93,11 +93,11 @@
                                     </td>
                                     <td>
                                         <span class="badge" :class="{
-                                                                    'badge-gray': download.status === 'queued',
-                                                                    'badge-blue': download.status === 'downloading',
-                                                                    'badge-green': download.status === 'completed',
-                                                                    'badge-red': download.status === 'failed'
-                                                                }" x-text="download.status_label"></span>
+                                                                        'badge-gray': download.status === 'queued',
+                                                                        'badge-blue': download.status === 'downloading',
+                                                                        'badge-green': download.status === 'completed',
+                                                                        'badge-red': download.status === 'failed'
+                                                                    }" x-text="download.status_label"></span>
                                     </td>
                                     <td>
                                         <template x-if="download.status === 'downloading' || download.status === 'queued'">
@@ -198,11 +198,11 @@
                                     </div>
                                     <div class="file-card-meta">
                                         <span class="badge" :class="{
-                                                                    'badge-gray': download.status === 'queued',
-                                                                    'badge-blue': download.status === 'downloading',
-                                                                    'badge-green': download.status === 'completed',
-                                                                    'badge-red': download.status === 'failed'
-                                                                }" x-text="download.status_label"></span>
+                                                                        'badge-gray': download.status === 'queued',
+                                                                        'badge-blue': download.status === 'downloading',
+                                                                        'badge-green': download.status === 'completed',
+                                                                        'badge-red': download.status === 'failed'
+                                                                    }" x-text="download.status_label"></span>
                                         <span x-show="download.formatted_size"
                                             x-text="' • ' + download.formatted_size"></span>
                                     </div>
@@ -235,17 +235,22 @@
                 </div>
             </template>
         </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" style="margin-top: 20px;">
+            {{ $downloads->links() }}
+        </div>
     </div>
 
     <script>
         function downloadManager() {
             return {
-                downloads: [],
+                downloads: @json($downloads->items()),
                 polling: null,
                 viewMode: localStorage.getItem('downloadsViewMode') || 'list',
 
                 init() {
-                    this.fetchDownloads();
+                    // Initial fetch is already done by server-side render
                     this.startPolling();
                     this.$watch('viewMode', (value) => localStorage.setItem('downloadsViewMode', value));
                 },
@@ -254,7 +259,20 @@
                     try {
                         const response = await fetch('{{ route("downloads.statusAll") }}');
                         const data = await response.json();
-                        this.downloads = data.downloads;
+
+                        // Smart merge: Update only what's changed in our current view
+                        data.downloads.forEach(updatedItem => {
+                            const index = this.downloads.findIndex(d => d.id === updatedItem.id);
+                            if (index !== -1) {
+                                // Update existing item properties
+                                const item = this.downloads[index];
+                                Object.keys(updatedItem).forEach(key => {
+                                    if (item[key] !== updatedItem[key]) {
+                                        item[key] = updatedItem[key];
+                                    }
+                                });
+                            }
+                        });
                     } catch (error) {
                         console.error('Failed to fetch downloads:', error);
                     }
