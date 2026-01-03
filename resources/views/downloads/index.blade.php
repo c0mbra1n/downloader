@@ -93,11 +93,11 @@
                                     </td>
                                     <td>
                                         <span class="badge" :class="{
-                                                    'badge-gray': download.status === 'queued',
-                                                    'badge-blue': download.status === 'downloading',
-                                                    'badge-green': download.status === 'completed',
-                                                    'badge-red': download.status === 'failed'
-                                                }" x-text="download.status_label"></span>
+                                                            'badge-gray': download.status === 'queued',
+                                                            'badge-blue': download.status === 'downloading',
+                                                            'badge-green': download.status === 'completed',
+                                                            'badge-red': download.status === 'failed'
+                                                        }" x-text="download.status_label"></span>
                                     </td>
                                     <td>
                                         <template x-if="download.status === 'downloading' || download.status === 'queued'">
@@ -142,12 +142,11 @@
                                                 </form>
                                             </template>
                                             <form :action="'/downloads/' + download.id" method="POST"
-                                                style="display: inline;"
-                                                @submit="return confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')">
+                                                style="display: inline;" x-ref="deleteForm">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm btn-icon"
-                                                    title="Remove">✕</button>
+                                                <button type="button" class="btn btn-danger btn-sm btn-icon" title="Remove"
+                                                    @click="if(confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) $refs.deleteForm.submit()">✕</button>
                                             </form>
                                         </div>
                                     </td>
@@ -199,11 +198,11 @@
                                     </div>
                                     <div class="file-card-meta">
                                         <span class="badge" :class="{
-                                                    'badge-gray': download.status === 'queued',
-                                                    'badge-blue': download.status === 'downloading',
-                                                    'badge-green': download.status === 'completed',
-                                                    'badge-red': download.status === 'failed'
-                                                }" x-text="download.status_label"></span>
+                                                            'badge-gray': download.status === 'queued',
+                                                            'badge-blue': download.status === 'downloading',
+                                                            'badge-green': download.status === 'completed',
+                                                            'badge-red': download.status === 'failed'
+                                                        }" x-text="download.status_label"></span>
                                         <span x-show="download.formatted_size"
                                             x-text="' • ' + download.formatted_size"></span>
                                     </div>
@@ -222,11 +221,11 @@
                                                 <button type="submit" class="btn btn-secondary btn-sm">↻ Retry</button>
                                             </form>
                                         </template>
-                                        <form :action="'/downloads/' + download.id" method="POST"
-                                            @submit="return confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')">
+                                        <form :action="'/downloads/' + download.id" method="POST" x-ref="deleteFormGrid">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                @click="if(confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) $el.closest('form').submit()">✕</button>
                                         </form>
                                     </div>
                                 </div>
