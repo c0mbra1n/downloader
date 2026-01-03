@@ -48,9 +48,9 @@
                     <span style="font-size: 14px; font-weight: 500;" x-text="'Uploading: ' + uploadFilename"></span>
                     <span style="font-size: 14px; font-weight: 500;" x-text="uploadProgress + '%'"></span>
                 </div>
-                <div style="height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden;">
-                    <div style="height: 100%; background: var(--primary); transition: width 0.3s;"
-                        :style="'width: ' + uploadProgress + '%'"></div>
+                <div style="height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden; position: relative;">
+                    <div style="height: 100%; background: var(--primary); transition: width 0.3s ease-out;"
+                        :style="{ width: uploadProgress + '%' }"></div>
                 </div>
             </div>
         </div>
