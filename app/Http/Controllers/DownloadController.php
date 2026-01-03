@@ -18,7 +18,7 @@ class DownloadController extends Controller
      */
     public function index(): View
     {
-        $downloads = Download::orderBy('created_at', 'desc')->paginate(20);
+        $downloads = Download::visibleInQueue()->orderBy('created_at', 'desc')->paginate(20);
 
         return view('downloads.index', compact('downloads'));
     }
@@ -97,8 +97,11 @@ class DownloadController extends Controller
         // Fetch IDs first to avoid MySQL subquery limit restrictions
         $recentIds = Download::orderBy('created_at', 'desc')->limit(10)->pluck('id')->toArray();
 
-        $downloads = Download::whereIn('status', $activeStatusIds)
-            ->orWhereIn('id', $recentIds)
+        $downloads = Download::visibleInQueue()
+            ->where(function ($query) use ($activeStatusIds, $recentIds) {
+                $query->whereIn('status', $activeStatusIds)
+                    ->orWhereIn('id', $recentIds);
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($download) {
@@ -145,13 +148,22 @@ class DownloadController extends Controller
     }
 
     /**
-     * Delete a download record (does NOT delete the file)
+     * Remove from queue history (Safe delete)
      */
     public function destroy(Download $download): RedirectResponse
     {
-        $download->delete();
+        // If it's already finished (Completed, Failed) or being processed, 
+        // just hide it from the queue list to keep the file in File Manager.
+        if (in_array($download->status, [DownloadStatus::COMPLETED, DownloadStatus::FAILED, DownloadStatus::PROCESSING])) {
+            $download->update(['hidden_in_queue' => true]);
+            $message = 'Download removed from list!';
+        } else {
+            // If it's still in queue/downloading, we cancel and delete the record
+            $download->delete();
+            $message = 'Download canceled and removed!';
+        }
 
         return redirect()->route('downloads.index')
-            ->with('success', 'Download record removed!');
+            ->with('success', $message);
     }
 }

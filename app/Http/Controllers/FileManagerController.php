@@ -31,7 +31,7 @@ class FileManagerController extends Controller
 
         $query = Download::whereIn('status', [DownloadStatus::COMPLETED, DownloadStatus::PROCESSING])
             ->whereNull('trashed_at')
-            ->orderBy('completed_at', 'desc');
+            ->orderBy('updated_at', 'desc');
 
         if ($category !== 'all') {
             $query->where('file_path', 'like', "downloads/{$category}/%");

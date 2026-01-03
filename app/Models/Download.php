@@ -24,6 +24,7 @@ class Download extends Model
         'started_at',
         'completed_at',
         'trashed_at',
+        'hidden_in_queue',
     ];
 
     protected $casts = [
@@ -35,7 +36,16 @@ class Download extends Model
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'trashed_at' => 'datetime',
+        'hidden_in_queue' => 'boolean',
     ];
+
+    /**
+     * Scope for visible in queue list
+     */
+    public function scopeVisibleInQueue($query)
+    {
+        return $query->where('hidden_in_queue', false);
+    }
 
     /**
      * Get formatted file size
