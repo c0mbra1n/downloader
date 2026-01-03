@@ -139,6 +139,10 @@ class YtDlpService
         $escapedDir = escapeshellarg($dir);
         $outputTemplate = escapeshellarg("%(title).100s__{$downloadId}.%(ext)s");
 
+        // Check if cookies file exists
+        $cookiesPath = storage_path('app/cookies.txt');
+        $cookiesFlag = file_exists($cookiesPath) ? '--cookies ' . escapeshellarg($cookiesPath) . ' ' : '';
+
         return sprintf(
             'yt-dlp %s ' .
             '--format %s ' .
@@ -147,12 +151,14 @@ class YtDlpService
             '--newline ' .
             '--progress ' .
             '--remote-components ejs:github ' .
+            '%s' .
             '--output %s/%s ' .
             '--no-mtime ' .
             '--restrict-filenames ' .
             '2>&1',
             $escapedUrl,
             escapeshellarg($this->format),
+            $cookiesFlag,
             $escapedDir,
             $outputTemplate
         );
