@@ -97,10 +97,14 @@ class DownloadController extends Controller
 
         $downloads = Download::whereIn('status', $activeStatusIds)
             ->orWhereIn('id', function ($query) {
+                // Wrap in another select to bypass MySQL limit restriction
                 $query->select('id')
-                    ->from('downloads')
-                    ->orderBy('created_at', 'desc')
-                    ->limit(10);
+                    ->from(function ($q) {
+                    $q->select('id')
+                        ->from('downloads')
+                        ->orderBy('created_at', 'desc')
+                        ->limit(10);
+                }, 'recent_downloads');
             })
             ->orderBy('created_at', 'desc')
             ->get()
