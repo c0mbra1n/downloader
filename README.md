@@ -1,59 +1,196 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📥 Private Web Downloader
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A self-hosted, private web downloader application built with Laravel. Download files from direct URLs and video platforms (YouTube, Vimeo, etc.) with background processing, file management, and media streaming capabilities.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat-square&logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **🔗 Multi-Source Downloads**
+  - Direct file URLs (via aria2c with multi-connection support)
+  - YouTube, Vimeo, Twitter, TikTok, and 20+ video platforms (via yt-dlp)
+  
+- **⚡ Background Processing**
+  - Laravel Queue-based downloads (non-blocking)
+  - Real-time progress tracking
+  - Auto-retry on failure
+  
+- **📁 File Manager**
+  - Categorized view (Videos, Audio, Documents, Archives, Others)
+  - Grid and List view toggle
+  - Download and delete files
+  
+- **🎬 Media Streaming**
+  - In-browser video/audio playback
+  - HTTP Range Request support (seeking works!)
+  
+- **📱 Responsive UI**
+  - Material Design flat theme
+  - Mobile-friendly with hamburger menu
+  - Dark/Light optimized
+  
+- **🔐 Single User Auth**
+  - Protected routes with Laravel authentication
+  - Session-based login
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📋 Requirements
 
-## Learning Laravel
+- PHP >= 8.2
+- Composer
+- MySQL / SQLite
+- [aria2c](https://aria2.github.io/) - for direct file downloads
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - for video platform downloads
+- [ffmpeg](https://ffmpeg.org/) - for video processing (optional)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Clone the repository
 
-## Laravel Sponsors
+```bash
+git clone https://github.com/c0mbra1n/downloader.git
+cd downloader
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Install dependencies
 
-### Premium Partners
+```bash
+composer install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 3. Configure environment
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Edit `.env` and configure your database:
 
-## Code of Conduct
+```env
+DB_CONNECTION=sqlite
+# or for MySQL:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=downloader
+# DB_USERNAME=root
+# DB_PASSWORD=
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Run migrations and seed admin user
 
-## Security Vulnerabilities
+```bash
+php artisan migrate --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Create storage link
 
-## License
+```bash
+php artisan storage:link
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 6. Install system dependencies
+
+**macOS:**
+```bash
+brew install aria2 yt-dlp ffmpeg
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install aria2 ffmpeg
+pip install yt-dlp
+```
+
+## 🏃 Running the Application
+
+### Start the development server
+
+```bash
+php artisan serve --port=8000
+```
+
+### Start the queue worker (required for downloads!)
+
+In a separate terminal:
+
+```bash
+php artisan queue:work
+```
+
+### Access the application
+
+Open http://localhost:8000 in your browser.
+
+**Default credentials:**
+- Email: `admin@example.com`
+- Password: `password`
+
+## 📁 Project Structure
+
+```
+app/
+├── Enums/
+│   └── DownloadStatus.php    # Status enum (queued/downloading/completed/failed)
+├── Http/Controllers/
+│   ├── Auth/LoginController.php
+│   ├── DownloadController.php
+│   ├── FileManagerController.php
+│   └── StreamController.php   # Media streaming with Range Request
+├── Jobs/
+│   └── DownloadJob.php        # Background download processing
+├── Models/
+│   └── Download.php
+└── Services/
+    ├── Aria2Service.php       # aria2c wrapper for direct URLs
+    └── YtDlpService.php       # yt-dlp wrapper for video platforms
+
+storage/app/downloads/
+├── videos/
+├── audios/
+├── documents/
+├── archives/
+└── others/
+```
+
+## ⚙️ Configuration
+
+Environment variables for download settings (`.env`):
+
+```env
+DOWNLOAD_MAX_CONNECTIONS=16     # Max connections per file
+DOWNLOAD_SPLIT_COUNT=16         # File splits for parallel download
+DOWNLOAD_MAX_SIMULTANEOUS=5     # Max concurrent downloads
+```
+
+## 📝 Usage
+
+### Adding a download
+
+1. Go to **Downloads** page
+2. Paste a URL (direct file or video platform URL)
+3. Click **Download**
+4. The file will be queued and processed by the queue worker
+
+### Playing media
+
+1. Go to **File Manager**
+2. Click **▶ Play** on video/audio files
+3. Media plays in a modal with seeking support
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](LICENSE).
+
+## 🙏 Acknowledgments
+
+- [aria2](https://aria2.github.io/) - Ultra fast download utility
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Video downloader
+- [Laravel](https://laravel.com/) - PHP Framework
+- [Alpine.js](https://alpinejs.dev/) - Lightweight JS framework
