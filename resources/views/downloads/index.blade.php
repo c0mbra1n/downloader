@@ -146,7 +146,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button" class="btn btn-danger btn-sm btn-icon" title="Remove"
-                                                    @click="if(confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) $el.closest('form').submit()">✕</button>
+                                                    @click="confirmDelete($el.closest('form'))">✕</button>
                                             </form>
                                         </div>
                                     </td>
@@ -221,11 +221,11 @@
                                                 <button type="submit" class="btn btn-secondary btn-sm">↻ Retry</button>
                                             </form>
                                         </template>
-                                        <form :action="'/downloads/' + download.id" method="POST" x-ref="deleteFormGrid">
+                                        <form :action="'/downloads/' + download.id" method="POST">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="btn btn-danger btn-sm"
-                                                @click="if(confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) $el.closest('form').submit()">✕</button>
+                                                @click="confirmDelete($el.closest('form'))">✕</button>
                                         </form>
                                     </div>
                                 </div>
@@ -264,6 +264,25 @@
                     this.polling = setInterval(() => {
                         this.fetchDownloads();
                     }, 2000);
+                },
+
+                stopPolling() {
+                    if (this.polling) {
+                        clearInterval(this.polling);
+                        this.polling = null;
+                    }
+                },
+
+                confirmDelete(formEl) {
+                    // Stop polling to prevent dialog dismissal
+                    this.stopPolling();
+                    
+                    if (confirm('Hapus record ini dari daftar? (File tidak akan dihapus)')) {
+                        formEl.submit();
+                    } else {
+                        // Resume polling if cancelled
+                        this.startPolling();
+                    }
                 },
 
                 truncateUrl(url) {
