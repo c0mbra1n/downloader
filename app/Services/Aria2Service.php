@@ -120,8 +120,17 @@ class Aria2Service
         $escapedDir = escapeshellarg($dir);
         $escapedFilename = escapeshellarg($filename);
 
+        // Universal cookies file - same as yt-dlp
+        $cookiesPath = storage_path('app/cookies.txt');
+        $cookiesFlag = '';
+        if (file_exists($cookiesPath) && filesize($cookiesPath) > 0) {
+            $cookiesFlag = '--load-cookies=' . escapeshellarg($cookiesPath) . ' ';
+            Log::info("Aria2c: Using cookies from {$cookiesPath}");
+        }
+
         return sprintf(
             'aria2c %s ' .
+            '%s' .
             '--max-connection-per-server=%d ' .
             '--split=%d ' .
             '--min-split-size=1M ' .
@@ -134,9 +143,10 @@ class Aria2Service
             '--human-readable=true ' .
             '--dir=%s ' .
             '--out=%s ' .
-            '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" ' .
+            '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" ' .
             '2>&1',
             $escapedUrl,
+            $cookiesFlag,
             $this->maxConnections,
             $this->splitCount,
             $escapedDir,
