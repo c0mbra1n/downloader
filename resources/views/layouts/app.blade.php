@@ -1065,21 +1065,13 @@
 
             <div class="sidebar-footer">
                 @php
-                    $downloadPath = storage_path('app/downloads');
-                    $totalSize = 0;
-                    $fileCount = 0;
-
-                    if (is_dir($downloadPath)) {
-                        $iterator = new RecursiveIteratorIterator(
-                            new RecursiveDirectoryIterator($downloadPath, RecursiveDirectoryIterator::SKIP_DOTS)
-                        );
-                        foreach ($iterator as $file) {
-                            if ($file->isFile() && !str_ends_with($file->getFilename(), '.part') && !str_ends_with($file->getFilename(), '.ytdl')) {
-                                $totalSize += $file->getSize();
-                                $fileCount++;
-                            }
-                        }
-                    }
+                    use App\Models\Download;
+                    use App\Enums\DownloadStatus;
+                    
+                    // Count only completed downloads from database
+                    $completedDownloads = Download::where('status', DownloadStatus::COMPLETED)->get();
+                    $fileCount = $completedDownloads->count();
+                    $totalSize = $completedDownloads->sum('file_size');
 
                     if ($totalSize >= 1073741824) {
                         $formattedSize = number_format($totalSize / 1073741824, 2) . ' GB';
@@ -1091,8 +1083,9 @@
                         $formattedSize = $totalSize . ' B';
                     }
 
-                    $diskFree = disk_free_space($downloadPath);
-                    $diskTotal = disk_total_space($downloadPath);
+                    $downloadPath = storage_path('app/downloads');
+                    $diskFree = is_dir($downloadPath) ? disk_free_space($downloadPath) : 0;
+                    $diskTotal = is_dir($downloadPath) ? disk_total_space($downloadPath) : 1;
                     $diskUsedPercent = $diskTotal > 0 ? round((($diskTotal - $diskFree) / $diskTotal) * 100) : 0;
 
                     if ($diskFree >= 1073741824) {
