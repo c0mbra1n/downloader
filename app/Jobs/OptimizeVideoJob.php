@@ -80,7 +80,7 @@ class OptimizeVideoJob implements ShouldQueue
             '-c:v',
             'libx264',
             '-preset',
-            'fast',
+            'ultrafast',
             '-crf',
             '23',
             '-c:a',
