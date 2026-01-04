@@ -43,7 +43,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            <span>Download</span>
+                            <span class="btn-text">Download</span>
                         </button>
                     </div>
                 </form>
@@ -93,11 +93,11 @@
                                     </td>
                                     <td>
                                         <span class="badge" :class="{
-                                                                        'badge-gray': download.status === 'queued',
-                                                                        'badge-blue': download.status === 'downloading',
-                                                                        'badge-green': download.status === 'completed',
-                                                                        'badge-red': download.status === 'failed'
-                                                                    }" x-text="download.status_label"></span>
+                                                                            'badge-gray': download.status === 'queued',
+                                                                            'badge-blue': download.status === 'downloading',
+                                                                            'badge-green': download.status === 'completed',
+                                                                            'badge-red': download.status === 'failed'
+                                                                        }" x-text="download.status_label"></span>
                                     </td>
                                     <td>
                                         <template x-if="download.status === 'downloading' || download.status === 'queued'">
@@ -198,11 +198,11 @@
                                     </div>
                                     <div class="file-card-meta">
                                         <span class="badge" :class="{
-                                                                        'badge-gray': download.status === 'queued',
-                                                                        'badge-blue': download.status === 'downloading',
-                                                                        'badge-green': download.status === 'completed',
-                                                                        'badge-red': download.status === 'failed'
-                                                                    }" x-text="download.status_label"></span>
+                                                                            'badge-gray': download.status === 'queued',
+                                                                            'badge-blue': download.status === 'downloading',
+                                                                            'badge-green': download.status === 'completed',
+                                                                            'badge-red': download.status === 'failed'
+                                                                        }" x-text="download.status_label"></span>
                                         <span x-show="download.formatted_size"
                                             x-text="' • ' + download.formatted_size"></span>
                                     </div>

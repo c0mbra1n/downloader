@@ -10,15 +10,15 @@
                     <h1 class="page-title">File Manager</h1>
                     <p class="page-subtitle">Browse and manage your downloaded files</p>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="header-actions">
                     <input type="file" x-ref="fileInput" style="display: none;" @change="handleFileUpload($event)">
                     <button class="btn btn-primary" @click="$refs.fileInput.click()" :disabled="uploading">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" style="margin-right: 4px;">
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        <span x-text="uploading ? 'Uploading...' : 'Upload File'"></span>
+                        <span class="btn-text" x-text="uploading ? 'Uploading...' : 'Upload File'"></span>
                     </button>
                     <div class="view-toggle">
                         <button class="view-toggle-btn" :class="{ 'active': viewMode === 'list' }"
@@ -48,7 +48,8 @@
                     <span style="font-size: 14px; font-weight: 500;" x-text="'Uploading: ' + uploadFilename"></span>
                     <span style="font-size: 14px; font-weight: 500;" x-text="uploadProgress + '%'"></span>
                 </div>
-                <div style="height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden; position: relative;">
+                <div
+                    style="height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden; position: relative;">
                     <div style="height: 100%; background: var(--primary); transition: width 0.3s ease-out;"
                         :style="{ width: uploadProgress + '%' }"></div>
                 </div>
@@ -56,13 +57,16 @@
         </div>
 
         <!-- Category Tabs -->
-        <div class="tabs">
-            @foreach($categories as $key => $name)
-                <a href="{{ route('files.index', ['category' => $key]) }}" class="tab {{ $category === $key ? 'active' : '' }}">
-                    {{ $name }}
-                    <span class="tab-count">{{ $counts[$key] ?? 0 }}</span>
-                </a>
-            @endforeach
+        <div class="tabs-container">
+            <div class="tabs">
+                @foreach($categories as $key => $name)
+                    <a href="{{ route('files.index', ['category' => $key]) }}"
+                        class="tab {{ $category === $key ? 'active' : '' }}">
+                        {{ $name }}
+                        <span class="tab-count">{{ $counts[$key] ?? 0 }}</span>
+                    </a>
+                @endforeach
+            </div>
         </div>
 
         <!-- Empty State -->
@@ -119,8 +123,11 @@
                             <div class="file-card-actions">
                                 @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
                                     <div style="width: 100%;">
-                                        <div class="progress-bar" style="height: 6px; margin-bottom: 4px; background: var(--divider); border-radius: 3px; overflow: hidden;">
-                                            <div class="progress-bar-fill" style="height: 100%; background: #7E22CE; transition: width 0.3s;" :style="'width: {{ $file->progress }}%'"></div>
+                                        <div class="progress-bar"
+                                            style="height: 6px; margin-bottom: 4px; background: var(--divider); border-radius: 3px; overflow: hidden;">
+                                            <div class="progress-bar-fill"
+                                                style="height: 100%; background: #7E22CE; transition: width 0.3s;"
+                                                :style="'width: {{ $file->progress }}%'"></div>
                                         </div>
                                         <div style="font-size: 11px; text-align: center; color: var(--text-medium); font-weight: 500;">
                                             Optimizing: {{ $file->progress }}%
@@ -141,7 +148,8 @@
                                             @endif
                                         </div>
                                     @endif
-                                    <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm" title="Download">⬇</a>
+                                    <a href="{{ route('files.download', $file) }}" class="btn btn-secondary btn-sm"
+                                        title="Download">⬇</a>
                                 @endif
                                 <form id="delete-form-grid-{{ $file->id }}" action="{{ route('files.destroy', $file) }}"
                                     method="POST" style="display: inline;">
@@ -189,8 +197,11 @@
                         <div class="file-list-item-actions">
                             @if($file->status === \App\Enums\DownloadStatus::PROCESSING)
                                 <div style="width: 120px; margin-right: 12px;">
-                                    <div class="progress-bar" style="height: 6px; margin-bottom: 2px; background: var(--divider); border-radius: 3px; overflow: hidden;">
-                                        <div class="progress-bar-fill" style="height: 100%; background: #7E22CE; transition: width 0.3s;" :style="'width: {{ $file->progress }}%'"></div>
+                                    <div class="progress-bar"
+                                        style="height: 6px; margin-bottom: 2px; background: var(--divider); border-radius: 3px; overflow: hidden;">
+                                        <div class="progress-bar-fill"
+                                            style="height: 100%; background: #7E22CE; transition: width 0.3s;"
+                                            :style="'width: {{ $file->progress }}%'"></div>
                                     </div>
                                     <div style="font-size: 10px; text-align: center; color: var(--text-medium);">
                                         Optimizing: {{ $file->progress }}%
@@ -267,11 +278,11 @@
 
                 init() {
                     this.$watch('viewMode', (value) => localStorage.setItem('filesViewMode', value));
-                    
+
                     // Safeguard: warn before leaving page while uploading
                     this.$watch('uploading', (value) => {
                         if (value) {
-                            window.onbeforeunload = function() {
+                            window.onbeforeunload = function () {
                                 return "Upload sedang berjalan. Jika Anda keluar, upload akan terhenti. Yakin ingin keluar?";
                             };
                         } else {
@@ -287,7 +298,7 @@
                             }
                         }, 5000); // refresh every 5s
                     @endif
-                },
+                    },
 
                 handleFileUpload(event) {
                     const file = event.target.files[0];

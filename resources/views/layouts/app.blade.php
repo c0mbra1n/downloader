@@ -109,8 +109,16 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
             z-index: 99;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
         }
 
         /* Layout */
@@ -123,13 +131,13 @@
         .sidebar {
             width: var(--sidebar-width);
             background: var(--bg-white);
-            box-shadow: var(--shadow-1);
+            box-shadow: var(--shadow-2);
             position: fixed;
             height: 100vh;
             display: flex;
             flex-direction: column;
             z-index: 100;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header {
@@ -259,9 +267,15 @@
         .page-header-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 16px;
             flex-wrap: wrap;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .page-title {
@@ -934,10 +948,6 @@
                 transform: translateX(0);
             }
 
-            .sidebar-overlay.show {
-                display: block;
-            }
-
             .main-content {
                 margin-left: 0;
                 padding: 16px;
@@ -951,10 +961,11 @@
             .page-header-row {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 12px;
             }
 
             .view-toggle {
-                align-self: flex-end;
+                align-self: flex-start;
             }
 
             .form-row {
@@ -962,67 +973,61 @@
             }
 
             .card-header {
-                padding: 12px;
+                padding: 12px 16px;
             }
 
             .card-body {
-                padding: 12px;
+                padding: 16px;
             }
 
-            .table th,
-            .table td {
-                padding: 10px 12px;
+            .table-container {
+                margin: 0 -16px;
+                width: calc(100% + 32px);
+                padding: 0 16px;
             }
 
             .file-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
                 gap: 12px;
             }
 
             .file-card-preview {
-                height: 60px;
-            }
-
-            .file-card-body {
-                padding: 10px;
-            }
-
-            .file-card-actions {
-                margin-top: 10px;
-                padding-top: 10px;
+                height: 80px;
             }
 
             .btn {
-                padding: 8px 12px;
-                font-size: 12px;
+                padding: 10px 16px;
+                font-size: 13px;
+                width: 100%;
+                /* Make buttons full width on small screens if they are primary actions */
             }
 
             .btn-sm {
+                width: auto;
                 padding: 6px 10px;
-                font-size: 11px;
             }
 
-            .tabs {
-                margin-bottom: 16px;
-            }
-
-            .tab {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-
-            .list-item {
-                flex-wrap: wrap;
-                gap: 12px;
-            }
-
-            .list-item-actions {
+            .header-actions {
                 width: 100%;
-                justify-content: flex-end;
+                justify-content: space-between;
             }
 
-            .file-list-item {
-                flex-wrap: wrap;
+            .btn-text {
+                display: none;
+            }
+
+            .btn {
+                padding: 10px;
+                width: auto;
+                min-width: 44px;
+            }
+
+            .btn-primary {
+                flex: 1; /* Make primary button take space */
+            }
+
+            .btn-primary .btn-text {
+                display: inline; /* Keep text for primary CTA if space allows? No, keep it short */
             }
 
             .file-list-item-actions {
@@ -1031,6 +1036,8 @@
                 padding-top: 12px;
                 border-top: 1px solid var(--divider);
                 justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 8px;
             }
         }
 
@@ -1040,18 +1047,38 @@
                 padding-top: 68px;
             }
 
+            .table-container {
+                margin: 0 -12px;
+                width: calc(100% + 24px);
+                padding: 0 12px;
+            }
+
             .file-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 8px;
             }
 
+            .file-card-preview {
+                height: 70px;
+            }
+
             .file-card-name {
                 font-size: 12px;
+                height: 36px;
             }
 
             .badge {
                 font-size: 10px;
                 padding: 3px 6px;
+            }
+
+            .page-title {
+                font-size: 18px;
+            }
+
+            .sidebar {
+                width: 280px;
+                /* Slightly wider on very small screens for better menu fit */
             }
         }
     </style>
