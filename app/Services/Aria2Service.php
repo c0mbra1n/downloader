@@ -78,6 +78,7 @@ class Aria2Service
 
         // Determine storage category
         $download->mime_type = $mimeType;
+        $download->filename = $originalFilename; // Set this so getStorageCategory() can use the extension fallback
         $category = $download->getStorageCategory();
 
         // Ensure category directory exists

@@ -71,12 +71,20 @@ class Download extends Model
     public function getStorageCategory(): string
     {
         $mime = $this->mime_type ?? '';
+        $extension = strtolower(pathinfo($this->filename ?? '', PATHINFO_EXTENSION));
 
-        if (str_starts_with($mime, 'video/')) {
+        // Video check (MIME or common extensions)
+        if (str_starts_with($mime, 'video/') || in_array($extension, ['mp4', 'mkv', 'webm', 'mov', 'avi', 'flv', 'wmv', 'm4v'])) {
             return 'videos';
-        } elseif (str_starts_with($mime, 'audio/')) {
+        }
+
+        // Audio check
+        if (str_starts_with($mime, 'audio/') || in_array($extension, ['mp3', 'm4a', 'ogg', 'wav', 'flac', 'aac', 'wma'])) {
             return 'audios';
-        } elseif (
+        }
+
+        // Document check
+        if (
             in_array($mime, [
                 'application/pdf',
                 'application/msword',
@@ -85,17 +93,20 @@ class Download extends Model
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'text/plain',
                 'text/html',
-            ])
+            ]) || in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'html', 'rtf'])
         ) {
             return 'documents';
-        } elseif (
+        }
+
+        // Archive check
+        if (
             in_array($mime, [
                 'application/zip',
                 'application/x-rar-compressed',
                 'application/x-7z-compressed',
                 'application/gzip',
                 'application/x-tar',
-            ])
+            ]) || in_array($extension, ['zip', 'rar', '7z', 'gz', 'tar', 'tgz', 'bz2'])
         ) {
             return 'archives';
         }
@@ -194,8 +205,7 @@ class Download extends Model
      */
     public function isPlayable(): bool
     {
-        $mime = $this->mime_type ?? '';
-        return str_starts_with($mime, 'video/') || str_starts_with($mime, 'audio/');
+        return $this->isVideo() || $this->isAudio();
     }
 
     /**
@@ -203,7 +213,10 @@ class Download extends Model
      */
     public function isVideo(): bool
     {
-        return str_starts_with($this->mime_type ?? '', 'video/');
+        $mime = $this->mime_type ?? '';
+        $extension = strtolower(pathinfo($this->filename ?? '', PATHINFO_EXTENSION));
+
+        return str_starts_with($mime, 'video/') || in_array($extension, ['mp4', 'mkv', 'webm', 'mov', 'avi', 'flv', 'wmv', 'm4v']);
     }
 
     /**
@@ -211,7 +224,10 @@ class Download extends Model
      */
     public function isAudio(): bool
     {
-        return str_starts_with($this->mime_type ?? '', 'audio/');
+        $mime = $this->mime_type ?? '';
+        $extension = strtolower(pathinfo($this->filename ?? '', PATHINFO_EXTENSION));
+
+        return str_starts_with($mime, 'audio/') || in_array($extension, ['mp3', 'm4a', 'ogg', 'wav', 'flac', 'aac', 'wma']);
     }
 
     /**
